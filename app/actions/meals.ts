@@ -25,11 +25,9 @@ export async function addMealToDay(
     .eq('id', mealId)
     .single();
 
-  if (!meal || !('calories' in meal)) {
+  if (!meal) {
     throw new Error('Meal not found');
   }
-
-  const typedMeal = meal as any;
 
   // Get or create daily log
   const { data: existingLog } = await supabase
@@ -46,13 +44,16 @@ export async function addMealToDay(
   const fatKey = 'total_fat';
   const fiberKey = 'total_fiber';
 
+  const typedMeal = meal as Record<string, any>;
+
   if (existingLog) {
     // Update existing log
-    const updatedCalories = (existingLog[calorieKey] || 0) + typedMeal.calories;
-    const updatedProtein = (existingLog[proteinKey] || 0) + typedMeal.protein_grams;
-    const updatedCarbs = (existingLog[carbsKey] || 0) + typedMeal.carbs_grams;
-    const updatedFat = (existingLog[fatKey] || 0) + typedMeal.fat_grams;
-    const updatedFiber = (existingLog[fiberKey] || 0) + (typedMeal.fiber_grams || 0);
+    const typedLog = existingLog as Record<string, any>;
+    const updatedCalories = (typedLog[calorieKey] || 0) + typedMeal.calories;
+    const updatedProtein = (typedLog[proteinKey] || 0) + typedMeal.protein_grams;
+    const updatedCarbs = (typedLog[carbsKey] || 0) + typedMeal.carbs_grams;
+    const updatedFat = (typedLog[fatKey] || 0) + typedMeal.fat_grams;
+    const updatedFiber = (typedLog[fiberKey] || 0) + (typedMeal.fiber_grams || 0);
 
     const { error } = await supabase
       .from('daily_logs')
@@ -64,7 +65,7 @@ export async function addMealToDay(
         [fatKey]: updatedFat,
         [fiberKey]: updatedFiber,
       })
-      .eq('id', existingLog.id);
+      .eq('id', typedLog.id);
 
     if (error) throw error;
   } else {
@@ -123,8 +124,8 @@ export async function swapMeal(
     throw new Error('Meal not found');
   }
 
-  const typedOriginalMeal = originalMeal as any;
-  const typedNewMeal = newMeal as any;
+  const typedOriginalMeal = originalMeal as Record<string, any>;
+  const typedNewMeal = newMeal as Record<string, any>;
 
   // Get the daily log
   const { data: log } = await supabase
@@ -138,7 +139,7 @@ export async function swapMeal(
     throw new Error('Daily log not found');
   }
 
-  const typedLog = log as any;
+  const typedLog = log as Record<string, any>;
 
   // Calculate nutrition difference
   const caloriesDiff = typedNewMeal.calories - typedOriginalMeal.calories;
