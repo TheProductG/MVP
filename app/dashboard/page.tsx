@@ -32,7 +32,8 @@ export default function DashboardPage() {
         .eq('id', session.user.id)
         .single();
 
-      setUser(userData);
+      const typedUserData = userData as any;
+      setUser(typedUserData);
 
       // Fetch stats
       const today = new Date().toISOString().split('T')[0];
@@ -52,8 +53,9 @@ export default function DashboardPage() {
         .select('*', { count: 'exact' })
         .eq('user_id', session.user.id);
 
+      const typedLogs = logs as any[];
       setStats({
-        todaysCalories: logs?.[0]?.total_calories || 0,
+        todaysCalories: typedLogs?.[0]?.total_calories || 0,
         mealPlans: planCount || 0,
         logs: logCount || 0,
       });
