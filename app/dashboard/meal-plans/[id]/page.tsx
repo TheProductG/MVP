@@ -26,7 +26,7 @@ export default function MealPlanDetailPage() {
       const { data: planData } = await supabase
         .from('user_meal_plans')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', params.id as string)
         .eq('user_id', user.id)
         .single();
 
