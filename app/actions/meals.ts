@@ -55,35 +55,32 @@ export async function addMealToDay(
     const updatedFat = (typedLog[fatKey] || 0) + typedMeal.fat_grams;
     const updatedFiber = (typedLog[fiberKey] || 0) + (typedMeal.fiber_grams || 0);
 
+    const updateData = {
+      [mealSlotField]: mealId,
+      [calorieKey]: updatedCalories,
+      [proteinKey]: updatedProtein,
+      [carbsKey]: updatedCarbs,
+      [fatKey]: updatedFat,
+      [fiberKey]: updatedFiber,
+    };
     // @ts-ignore - Dynamic property keys with Supabase
-    const { error } = await supabase
-      .from('daily_logs')
-      .update({
-        [mealSlotField]: mealId,
-        [calorieKey]: updatedCalories,
-        [proteinKey]: updatedProtein,
-        [carbsKey]: updatedCarbs,
-        [fatKey]: updatedFat,
-        [fiberKey]: updatedFiber,
-      })
-      .eq('id', typedLog.id);
+    const { error } = await supabase.from('daily_logs').update(updateData).eq('id', typedLog.id);
 
     if (error) throw error;
   } else {
     // Create new log
+    const newLogData = {
+      user_id: user.id,
+      date,
+      [mealSlotField]: mealId,
+      total_calories: typedMeal.calories,
+      total_protein: typedMeal.protein_grams,
+      total_carbs: typedMeal.carbs_grams,
+      total_fat: typedMeal.fat_grams,
+      total_fiber: typedMeal.fiber_grams || 0,
+    };
     // @ts-ignore - Dynamic property keys with Supabase
-    const { error } = await supabase.from('daily_logs').insert([
-      {
-        user_id: user.id,
-        date,
-        [mealSlotField]: mealId,
-        total_calories: typedMeal.calories,
-        total_protein: typedMeal.protein_grams,
-        total_carbs: typedMeal.carbs_grams,
-        total_fat: typedMeal.fat_grams,
-        total_fiber: typedMeal.fiber_grams || 0,
-      },
-    ]);
+    const { error } = await supabase.from('daily_logs').insert([newLogData]);
 
     if (error) throw error;
   }
@@ -153,33 +150,30 @@ export async function swapMeal(
   // Update daily log
   const mealSlotField = `${mealSlot}_meal_id`;
 
+  const swapUpdateData = {
+    [mealSlotField]: newMealId,
+    total_calories: typedLog.total_calories + caloriesDiff,
+    total_protein: typedLog.total_protein + proteinDiff,
+    total_carbs: typedLog.total_carbs + carbsDiff,
+    total_fat: typedLog.total_fat + fatDiff,
+    total_fiber: typedLog.total_fiber + fiberDiff,
+  };
   // @ts-ignore - Dynamic property keys with Supabase
-  const { error: updateError } = await supabase
-    .from('daily_logs')
-    .update({
-      [mealSlotField]: newMealId,
-      total_calories: typedLog.total_calories + caloriesDiff,
-      total_protein: typedLog.total_protein + proteinDiff,
-      total_carbs: typedLog.total_carbs + carbsDiff,
-      total_fat: typedLog.total_fat + fatDiff,
-      total_fiber: typedLog.total_fiber + fiberDiff,
-    })
-    .eq('id', typedLog.id);
+  const { error: updateError } = await supabase.from('daily_logs').update(swapUpdateData).eq('id', typedLog.id);
 
   if (updateError) throw updateError;
 
   // Record the swap in swap_history
+  const swapHistoryData = {
+    user_id: user.id,
+    date,
+    meal_slot: mealSlot,
+    original_meal_id: originalMealId,
+    new_meal_id: newMealId,
+    reason: reason || null,
+  };
   // @ts-ignore - Supabase type compatibility
-  const { error: historyError } = await supabase.from('swap_history').insert([
-    {
-      user_id: user.id,
-      date,
-      meal_slot: mealSlot,
-      original_meal_id: originalMealId,
-      new_meal_id: newMealId,
-      reason: reason || null,
-    },
-  ]);
+  const { error: historyError } = await supabase.from('swap_history').insert([swapHistoryData]);
 
   if (historyError) throw historyError;
 
@@ -269,7 +263,7 @@ export async function generateWeeklyPlan(startDate: string, mealPlanId: string) 
 
   // Insert the daily plans
   // @ts-ignore - Supabase type compatibility with generated meal plans
-  const { error } = await supabase.from('daily_logs').insert(dailyPlans);
+  const { error } = await supabase.from('daily_logs').insert(dailyPlans as any);
 
   if (error) throw error;
 
