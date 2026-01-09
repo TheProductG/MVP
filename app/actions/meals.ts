@@ -1,5 +1,6 @@
 'use server';
 
+// Meal actions for FlexPlan MVP
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
