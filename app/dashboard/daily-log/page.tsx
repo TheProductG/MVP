@@ -38,20 +38,24 @@ export default function DailyLogPage() {
     if (!user) return;
 
     if (log) {
+      const updateData = { mood };
+      // @ts-ignore - Dynamic property keys with Supabase
       await supabase
         .from('daily_logs')
-        .update({ mood })
+        .update(updateData)
         .eq('id', log.id);
     } else {
+      const insertData = [
+        {
+          user_id: user.id,
+          date: selectedDate,
+          mood,
+        },
+      ];
+      // @ts-ignore - Dynamic property keys with Supabase
       const { data } = await supabase
         .from('daily_logs')
-        .insert([
-          {
-            user_id: user.id,
-            date: selectedDate,
-            mood,
-          },
-        ])
+        .insert(insertData)
         .select();
 
       if (data) {
