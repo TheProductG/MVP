@@ -25,9 +25,11 @@ export async function addMealToDay(
     .eq('id', mealId)
     .single();
 
-  if (!meal) {
+  if (!meal || !('calories' in meal)) {
     throw new Error('Meal not found');
   }
+
+  const typedMeal = meal as any;
 
   // Get or create daily log
   const { data: existingLog } = await supabase
@@ -46,11 +48,11 @@ export async function addMealToDay(
 
   if (existingLog) {
     // Update existing log
-    const updatedCalories = (existingLog[calorieKey] || 0) + meal.calories;
-    const updatedProtein = (existingLog[proteinKey] || 0) + meal.protein_grams;
-    const updatedCarbs = (existingLog[carbsKey] || 0) + meal.carbs_grams;
-    const updatedFat = (existingLog[fatKey] || 0) + meal.fat_grams;
-    const updatedFiber = (existingLog[fiberKey] || 0) + (meal.fiber_grams || 0);
+    const updatedCalories = (existingLog[calorieKey] || 0) + typedMeal.calories;
+    const updatedProtein = (existingLog[proteinKey] || 0) + typedMeal.protein_grams;
+    const updatedCarbs = (existingLog[carbsKey] || 0) + typedMeal.carbs_grams;
+    const updatedFat = (existingLog[fatKey] || 0) + typedMeal.fat_grams;
+    const updatedFiber = (existingLog[fiberKey] || 0) + (typedMeal.fiber_grams || 0);
 
     const { error } = await supabase
       .from('daily_logs')
@@ -72,11 +74,11 @@ export async function addMealToDay(
         user_id: user.id,
         date,
         [mealSlotField]: mealId,
-        total_calories: meal.calories,
-        total_protein: meal.protein_grams,
-        total_carbs: meal.carbs_grams,
-        total_fat: meal.fat_grams,
-        total_fiber: meal.fiber_grams || 0,
+        total_calories: typedMeal.calories,
+        total_protein: typedMeal.protein_grams,
+        total_carbs: typedMeal.carbs_grams,
+        total_fat: typedMeal.fat_grams,
+        total_fiber: typedMeal.fiber_grams || 0,
       },
     ]);
 
@@ -121,6 +123,9 @@ export async function swapMeal(
     throw new Error('Meal not found');
   }
 
+  const typedOriginalMeal = originalMeal as any;
+  const typedNewMeal = newMeal as any;
+
   // Get the daily log
   const { data: log } = await supabase
     .from('daily_logs')
@@ -133,12 +138,14 @@ export async function swapMeal(
     throw new Error('Daily log not found');
   }
 
+  const typedLog = log as any;
+
   // Calculate nutrition difference
-  const caloriesDiff = newMeal.calories - originalMeal.calories;
-  const proteinDiff = newMeal.protein_grams - originalMeal.protein_grams;
-  const carbsDiff = newMeal.carbs_grams - originalMeal.carbs_grams;
-  const fatDiff = newMeal.fat_grams - originalMeal.fat_grams;
-  const fiberDiff = (newMeal.fiber_grams || 0) - (originalMeal.fiber_grams || 0);
+  const caloriesDiff = typedNewMeal.calories - typedOriginalMeal.calories;
+  const proteinDiff = typedNewMeal.protein_grams - typedOriginalMeal.protein_grams;
+  const carbsDiff = typedNewMeal.carbs_grams - typedOriginalMeal.carbs_grams;
+  const fatDiff = typedNewMeal.fat_grams - typedOriginalMeal.fat_grams;
+  const fiberDiff = (typedNewMeal.fiber_grams || 0) - (typedOriginalMeal.fiber_grams || 0);
 
   // Update daily log
   const mealSlotField = `${mealSlot}_meal_id`;
@@ -147,13 +154,13 @@ export async function swapMeal(
     .from('daily_logs')
     .update({
       [mealSlotField]: newMealId,
-      total_calories: log.total_calories + caloriesDiff,
-      total_protein: log.total_protein + proteinDiff,
-      total_carbs: log.total_carbs + carbsDiff,
-      total_fat: log.total_fat + fatDiff,
-      total_fiber: log.total_fiber + fiberDiff,
+      total_calories: typedLog.total_calories + caloriesDiff,
+      total_protein: typedLog.total_protein + proteinDiff,
+      total_carbs: typedLog.total_carbs + carbsDiff,
+      total_fat: typedLog.total_fat + fatDiff,
+      total_fiber: typedLog.total_fiber + fiberDiff,
     })
-    .eq('id', log.id);
+    .eq('id', typedLog.id);
 
   if (updateError) throw updateError;
 
@@ -233,25 +240,25 @@ export async function generateWeeklyPlan(startDate: string, mealPlanId: string) 
       dinner_meal_id: selectedDinner?.id || null,
       snack_meal_id: null,
       total_calories:
-        (selectedBreakfast?.calories || 0) +
-        (selectedLunch?.calories || 0) +
-        (selectedDinner?.calories || 0),
+        ((selectedBreakfast as any)?.calories || 0) +
+        ((selectedLunch as any)?.calories || 0) +
+        ((selectedDinner as any)?.calories || 0),
       total_protein:
-        (selectedBreakfast?.protein_grams || 0) +
-        (selectedLunch?.protein_grams || 0) +
-        (selectedDinner?.protein_grams || 0),
+        ((selectedBreakfast as any)?.protein_grams || 0) +
+        ((selectedLunch as any)?.protein_grams || 0) +
+        ((selectedDinner as any)?.protein_grams || 0),
       total_carbs:
-        (selectedBreakfast?.carbs_grams || 0) +
-        (selectedLunch?.carbs_grams || 0) +
-        (selectedDinner?.carbs_grams || 0),
+        ((selectedBreakfast as any)?.carbs_grams || 0) +
+        ((selectedLunch as any)?.carbs_grams || 0) +
+        ((selectedDinner as any)?.carbs_grams || 0),
       total_fat:
-        (selectedBreakfast?.fat_grams || 0) +
-        (selectedLunch?.fat_grams || 0) +
-        (selectedDinner?.fat_grams || 0),
+        ((selectedBreakfast as any)?.fat_grams || 0) +
+        ((selectedLunch as any)?.fat_grams || 0) +
+        ((selectedDinner as any)?.fat_grams || 0),
       total_fiber:
-        (selectedBreakfast?.fiber_grams || 0) +
-        (selectedLunch?.fiber_grams || 0) +
-        (selectedDinner?.fiber_grams || 0),
+        ((selectedBreakfast as any)?.fiber_grams || 0) +
+        ((selectedLunch as any)?.fiber_grams || 0) +
+        ((selectedDinner as any)?.fiber_grams || 0),
     });
   }
 
