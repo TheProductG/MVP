@@ -35,27 +35,29 @@ export default function AnalyticsPage() {
         .gte('date', startDate)
         .order('date', { ascending: true });
 
-      if (logs && logs.length > 0) {
-        const totalCalories = logs.reduce((sum, log) => sum + log.total_calories, 0);
-        const totalProtein = logs.reduce((sum, log) => sum + log.total_protein, 0);
-        const totalCarbs = logs.reduce((sum, log) => sum + log.total_carbs, 0);
-        const totalFat = logs.reduce((sum, log) => sum + log.total_fat, 0);
+      const typedLogs = logs as any[];
+
+      if (typedLogs && typedLogs.length > 0) {
+        const totalCalories = typedLogs.reduce((sum, log) => sum + log.total_calories, 0);
+        const totalProtein = typedLogs.reduce((sum, log) => sum + log.total_protein, 0);
+        const totalCarbs = typedLogs.reduce((sum, log) => sum + log.total_carbs, 0);
+        const totalFat = typedLogs.reduce((sum, log) => sum + log.total_fat, 0);
 
         const moodCounts: Record<string, number> = {};
-        logs.forEach((log) => {
+        typedLogs.forEach((log) => {
           if (log.mood) {
             moodCounts[log.mood] = (moodCounts[log.mood] || 0) + 1;
           }
         });
 
         setStats({
-          totalLogs: logs.length,
-          avgCalories: Math.round(totalCalories / logs.length),
-          avgProtein: Math.round((totalProtein / logs.length) * 10) / 10,
-          avgCarbs: Math.round((totalCarbs / logs.length) * 10) / 10,
-          avgFat: Math.round((totalFat / logs.length) * 10) / 10,
+          totalLogs: typedLogs.length,
+          avgCalories: Math.round(totalCalories / typedLogs.length),
+          avgProtein: Math.round((totalProtein / typedLogs.length) * 10) / 10,
+          avgCarbs: Math.round((totalCarbs / typedLogs.length) * 10) / 10,
+          avgFat: Math.round((totalFat / typedLogs.length) * 10) / 10,
           moodBreakdown: moodCounts,
-          weeklyTrend: logs,
+          weeklyTrend: typedLogs,
         });
       }
 
