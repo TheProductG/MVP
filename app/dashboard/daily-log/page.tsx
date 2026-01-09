@@ -42,10 +42,7 @@ export default function DailyLogPage() {
     if (log) {
       const updateData = { mood };
       // @ts-ignore - Dynamic property keys with Supabase
-      await supabase
-        .from('daily_logs')
-        .update(updateData)
-        .eq('id', log.id);
+      await supabase.from('daily_logs').update(updateData).eq('id', log.id);
     } else {
       const insertData = [
         {
@@ -55,10 +52,7 @@ export default function DailyLogPage() {
         },
       ];
       // @ts-ignore - Dynamic property keys with Supabase
-      const { data } = await supabase
-        .from('daily_logs')
-        .insert(insertData)
-        .select();
+      const { data } = await supabase.from('daily_logs').insert(insertData).select();
 
       if (data) {
         setLog(data[0]);
