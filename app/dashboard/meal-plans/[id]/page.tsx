@@ -35,7 +35,8 @@ export default function MealPlanDetailPage() {
         return;
       }
 
-      setPlan(planData);
+      const typedPlanData = planData as any;
+      setPlan(typedPlanData);
 
       // Fetch associated daily logs
       const { data: logsData } = await supabase
@@ -49,7 +50,7 @@ export default function MealPlanDetailPage() {
           snack_meal:master_meals!snack_meal_id(name, calories)
         `
         )
-        .eq('meal_plan_id', planData.id)
+        .eq('meal_plan_id', typedPlanData.id)
         .order('date', { ascending: true });
 
       setLogs(logsData || []);
