@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
+// Force Vercel cache clear
 export default function AnalyticsPage() {
   const [stats, setStats] = useState({
     totalLogs: 0,
