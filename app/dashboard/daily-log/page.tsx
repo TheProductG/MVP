@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
+// Force Vercel cache clear v2
+
 export default function DailyLogPage() {
   const [log, setLog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
