@@ -56,8 +56,9 @@ export default function NewMealPlanPage() {
 
       if (error) throw error;
 
-      if (data) {
-        router.push(`/dashboard/meal-plans/${data[0].id}`);
+      const typedData = data as any[];
+      if (typedData && typedData.length > 0) {
+        router.push(`/dashboard/meal-plans/${typedData[0].id}`);
       }
     } catch (error) {
       console.error('Error creating meal plan:', error);
