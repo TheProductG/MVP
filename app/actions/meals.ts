@@ -213,6 +213,8 @@ export async function generateWeeklyPlan(startDate: string, mealPlanId: string) 
     throw new Error('No meals available');
   }
 
+  const typedMeals = meals as any[];
+
   // Generate plan for 7 days
   const dailyPlans = [];
 
@@ -222,9 +224,9 @@ export async function generateWeeklyPlan(startDate: string, mealPlanId: string) 
     const dateStr = date.toISOString().split('T')[0];
 
     // Select random meals for each category
-    const breakfastMeals = meals.filter((m) => m.category === 'breakfast');
-    const lunchMeals = meals.filter((m) => m.category === 'lunch');
-    const dinnerMeals = meals.filter((m) => m.category === 'dinner');
+    const breakfastMeals = typedMeals.filter((m) => m.category === 'breakfast');
+    const lunchMeals = typedMeals.filter((m) => m.category === 'lunch');
+    const dinnerMeals = typedMeals.filter((m) => m.category === 'dinner');
 
     const selectedBreakfast = breakfastMeals[Math.floor(Math.random() * breakfastMeals.length)];
     const selectedLunch = lunchMeals[Math.floor(Math.random() * lunchMeals.length)];
